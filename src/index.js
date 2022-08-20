@@ -19,7 +19,7 @@ const limiter = rateLimit({
 app.use(limiter);
 
 // TODO: Add API's
-app.use('/dev', require('./apis/dev'));
+app.use(require('./apis'));
 
 // 404 Fallback.
 app.use((req, res) => {
