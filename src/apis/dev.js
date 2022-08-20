@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const { User } = require('../models/all');
+const { Member } = require('../models/all');
 
 const DEV_IPS = ["::ffff:127.0.0.1", "::1"];
 if (process.env.DEV_IPS) {
@@ -21,8 +21,8 @@ router.use((req, res, next) => {
   }
 });
 
-// Creates a new user
-router.post('/user/create', (req, res) => {
+// Creates a new member
+router.post('/member/create', (req, res) => {
   // Verify body
   if (!req.body.username) {
     res.status(400).send({ 'err': 'Missing username' });
@@ -30,51 +30,51 @@ router.post('/user/create', (req, res) => {
   }
 
   const result = {};
-  const user = new User({ username: req.body.username });
+  const member = new Member({ username: req.body.username });
 
   // Set role.
   if (req.body.role) {
-    user.role = req.body.role;
+    member.role = req.body.role;
   }
 
   // Set password.
   if (req.body.password) {
-    user.setPassword(req.body.password);
-    user.resetFlag = false;
+    member.setPassword(req.body.password);
+    member.resetFlag = false;
   }
   else {
-    result.tempPassword = user.resetPassword();
+    result.tempPassword = member.resetPassword();
   }
 
   // Save.
-  user.save().then(() => {
-    result.user = user.toJSON();
+  member.save().then(() => {
+    result.member = member.toJSON();
     res.send(result);
   }).catch((err) => {
-    res.status(501).send({ 'err': 'Could not create new user.' });
+    res.status(501).send({ 'err': 'Could not create new member.' });
     console.log(err);
   });
 });
 
-// Gets a user by there id.
-router.get('/user/:id', (req, res) => {
-  User.findById(req.params.id).then(user => {
-    if (user) {
-      res.send(user.toJSON());
+// Gets a member by there id.
+router.get('/member/:id', (req, res) => {
+  Member.findById(req.params.id).then(member => {
+    if (member) {
+      res.send(member.toJSON());
     }
     else {
-      res.send({ 'err': 'Could not find user.' });
+      res.send({ 'err': 'Could not find member.' });
     }
   });
 });
-router.put('/user/:id/reset', (req, res) => {
-  User.findById(req.params.id).then(user => {
-    if (user) {
-      const tempPassword = user.resetPassword();
-      user.save().then(() => res.send({ tempPassword: tempPassword, user: user.toJSON() }));
+router.put('/member/:id/reset', (req, res) => {
+  Member.findById(req.params.id).then(member => {
+    if (member) {
+      const tempPassword = member.resetPassword();
+      member.save().then(() => res.send({ tempPassword: tempPassword, member: member.toJSON() }));
     }
     else {
-      res.send({ 'err': 'Could not find user.' });
+      res.send({ 'err': 'Could not find member.' });
     }
   });
 });

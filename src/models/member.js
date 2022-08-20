@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const randstr = require('../randstr');
 
-const userSchema = new mongoose.Schema({
+const memberSchema = new mongoose.Schema({
   username: {
     type: String,
     required: true,
@@ -10,6 +10,7 @@ const userSchema = new mongoose.Schema({
   },
   role: {
     type: String,
+    enum: ['admin', 'borrower'],
     default: 'borrower'
   },
 
@@ -70,5 +71,5 @@ const userSchema = new mongoose.Schema({
   }
 });
 
-const User = mongoose.model('user', userSchema);
-module.exports = User;
+const Member = mongoose.model('member', memberSchema);
+module.exports = Member;

@@ -1,6 +1,6 @@
-const User = require('../models/user');
+const Member = require('../models/member');
 
-async function getLoggedInUser(req) {
+async function getLoggedInMember(req) {
   // Setup auth header.
   const auth = req.header('Authorization');
   if (!auth) {
@@ -11,15 +11,15 @@ async function getLoggedInUser(req) {
     return null;
   }
 
-  // Get user from login id.
-  const user = await User.findOne({ "logins._id": tokens[1] })
-  if (user == null) {
+  // Get member from login id.
+  const member = await Member.findOne({ "logins._id": tokens[1] })
+  if (member == null) {
     return null;
   }
 
   // Get if login is expired.
   let expired = false;
-  user.logins = user.logins.filter(login => {
+  member.logins = member.logins.filter(login => {
     if (login._id == tokens[1] && Date.now() <= login.expires.getDate()) {
       expired = true;
       return false;
@@ -29,12 +29,12 @@ async function getLoggedInUser(req) {
 
   // Return whether the login is valid.
   if (expired) {
-    await user.save();
+    await member.save();
     return null;
   }
   else{
-    return user;
+    return member;
   }
 }
 
-module.exports = getLoggedInUser;
+module.exports = getLoggedInMember;

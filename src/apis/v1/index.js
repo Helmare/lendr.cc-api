@@ -1,4 +1,4 @@
 const router = require('express').Router();
-router.use('/user', require('./user'));
+router.use('/member', require('./member'));
 
 module.exports = router;

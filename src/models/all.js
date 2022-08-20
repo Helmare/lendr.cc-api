@@ -1,4 +1,5 @@
 // Exports all models.
 module.exports = {
-  User: require('./user')
+  Member: require('./member'),
+  Account: require('./account')
 }

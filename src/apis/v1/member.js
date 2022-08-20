@@ -1,8 +1,8 @@
 const router = require('express').Router();
-const { User } = require('../../models/all');
-const getLoggedInUser = require('../secure');
+const { Member } = require('../../models/all');
+const getLoggedInMember = require('../secure');
 
-// Creates a login instance for the user.
+// Creates a login instance for the member.
 router.post('/login', async (req, res) => {
   if (!req.body.username) {
     res.status(400).send({ 'err': 'Missing username.' });
@@ -13,22 +13,22 @@ router.post('/login', async (req, res) => {
     return;
   }
 
-  const user = await User.findOne({ username: req.body.username });
-  if (user && user.verifyPassword(req.body.password)) {
-    if (user.resetFlag) {
-      // Forces user to reset password.
+  const member = await Member.findOne({ username: req.body.username });
+  if (member && member.verifyPassword(req.body.password)) {
+    if (member.resetFlag) {
+      // Forces member to reset password.
       res.send({
-        resetFlag: user.resetFlag
+        resetFlag: member.resetFlag
       });
     }
     else {
-      // Logs in user.
-      const login = user.login();
-      await user.save();
+      // Logs in member.
+      const login = member.login();
+      await member.save();
       res.send(login);
     }
   } else {
-    res.send({ 'err': 'Invalid username or password.' })
+    res.send({ 'err': 'Invalid username or password.' });
   }
 });
 
@@ -43,53 +43,53 @@ router.put('/reset-password', async (req, res) => {
     return;
   }
 
-  const user = await User.findOne({ resetFlag: req.body.resetFlag });
-  if (user == null) {
+  const member = await Member.findOne({ resetFlag: req.body.resetFlag });
+  if (member == null) {
     res.status(403).send({ err: 'Forbidden' })
   }
   else {
-    user.setPassword(req.body.password);
-    user.resetFlag = '';
+    member.setPassword(req.body.password);
+    member.resetFlag = '';
 
-    await user.save();
+    await member.save();
     res.send({ msg: 'Successfully changed password.' });
   }
 });
 
-// Logs out of the current user.
+// Logs out of the current member.
 router.post('/logout', async (req, res) => {
-  const user = await getLoggedInUser(req);
-  if (!user) {
+  const member = await getLoggedInMember(req);
+  if (!member) {
     res.status(401).send({ err: 'Access denied, must be logged in.' });
     return;
   }
 
-  user.logins = user.logins.filter(l => l._id != loginId);
-  await user.save();
+  member.logins = member.logins.filter(l => l._id != loginId);
+  await member.save();
   res.send({ msg: 'Successfully logged out.' });
 });
-// Clears all login instances of the current user.
+// Clears all login instances of the current member.
 router.post('/logout-all', async (req, res) => {
-  const user = await getLoggedInUser(req);
-  if (!user) {
+  const member = await getLoggedInMember(req);
+  if (!member) {
     res.status(401).send({ err: 'Access denied, must be logged in.' });
     return;
   }
 
-  user.logins = [];
-  await user.save();
+  member.logins = [];
+  await member.save();
   res.send({ msg: 'Successfully logged out of everything.' });
 });
 
-// An endpoint for checking whether you are logged in, returns the user logged in.
+// An endpoint for checking whether you are logged in, returns the member logged in.
 router.get('/me', async (req, res) => {
-  const user = await getLoggedInUser(req);
-  if (!user) {
+  const member = await getLoggedInMember(req);
+  if (!member) {
     res.status(401).send({ err: 'Access denied, must be logged in.' });
     return;
   }
 
-  const obj = user.toObject();
+  const obj = member.toObject();
   delete obj.resetFlag
   delete obj.password
   delete obj.logins;
