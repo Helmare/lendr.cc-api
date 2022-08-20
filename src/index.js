@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const express = require('express');
 const rateLimit = require('express-rate-limit');
 require('dotenv').config();
@@ -27,6 +28,12 @@ app.use((req, res) => {
 });
 
 
-// Start app.
-const port = process.env.PORT || 3000;
-app.listen(port, () => console.log(`Running api.happiiloans.com on port ${port}.`));
+// Connect to database.
+mongoose.connect(process.env.DB_HOST, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+}).then(() => {
+  // Start app after connection.
+  const port = process.env.PORT || 3000;
+  app.listen(port, () => console.log(`Running api.happiiloans.com on port ${port}.`));
+}).catch((err) => console.error(err));
