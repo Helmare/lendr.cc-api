@@ -1,9 +1,9 @@
 const router = require('express').Router();
-const { User } = require('../models/all');
-const getLoggedInUser = require('./secure');
+const { User } = require('../../models/all');
+const getLoggedInUser = require('../secure');
 
 // Creates a login instance for the user.
-router.post('/user/login', async (req, res) => {
+router.post('/login', async (req, res) => {
   if (!req.body.username) {
     res.status(400).send({ 'err': 'Missing username.' });
     return;
@@ -33,7 +33,7 @@ router.post('/user/login', async (req, res) => {
 });
 
 // Resets the password of someone who needs it reset.
-router.put('/user/reset-password', async (req, res) => {
+router.put('/reset-password', async (req, res) => {
   if (!req.body.resetFlag) {
     res.status(400).send({ err: 'Missing resetFlag.' });
     return;
@@ -57,7 +57,7 @@ router.put('/user/reset-password', async (req, res) => {
 });
 
 // Logs out of the current user.
-router.post('/user/logout', async (req, res) => {
+router.post('/logout', async (req, res) => {
   const user = await getLoggedInUser(req);
   if (!user) {
     res.status(401).send({ err: 'Access denied, must be logged in.' });
@@ -69,7 +69,7 @@ router.post('/user/logout', async (req, res) => {
   res.send({ msg: 'Successfully logged out.' });
 });
 // Clears all login instances of the current user.
-router.post('/user/logout-all', async (req, res) => {
+router.post('/logout-all', async (req, res) => {
   const user = await getLoggedInUser(req);
   if (!user) {
     res.status(401).send({ err: 'Access denied, must be logged in.' });
@@ -82,7 +82,7 @@ router.post('/user/logout-all', async (req, res) => {
 });
 
 // An endpoint for checking whether you are logged in, returns the user logged in.
-router.get('/user/me', async (req, res) => {
+router.get('/me', async (req, res) => {
   const user = await getLoggedInUser(req);
   if (!user) {
     res.status(401).send({ err: 'Access denied, must be logged in.' });

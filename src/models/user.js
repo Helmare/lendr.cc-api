@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const randstr = require('../randstr');
 
-const userScheme = new mongoose.Schema({
+const userSchema = new mongoose.Schema({
   username: {
     type: String,
     required: true,
@@ -70,5 +70,5 @@ const userScheme = new mongoose.Schema({
   }
 });
 
-const User = mongoose.model('user', userScheme);
+const User = mongoose.model('user', userSchema);
 module.exports = User;
