@@ -19,10 +19,11 @@ const limiter = rateLimit({
 app.use(limiter);
 
 // TODO: Add API's
+app.use('/dev', require('./apis/dev'));
 
 // 404 Fallback.
 app.use((req, res) => {
-  res.status(404).send({ err: `Cannot ${req.method.toUpperCase()} ${req.url}`, ip: req.ip })
+  res.status(404).send({ err: `Cannot ${req.method.toUpperCase()} ${req.url}` })
 });
 
 
