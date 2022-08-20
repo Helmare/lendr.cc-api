@@ -25,7 +25,7 @@ router.use((req, res, next) => {
 router.post('/user/create', (req, res) => {
   // Verify body
   if (!req.body.username) {
-    res.status(401).send({ 'err': 'Missing username' });
+    res.status(400).send({ 'err': 'Missing username' });
     return;
   }
 

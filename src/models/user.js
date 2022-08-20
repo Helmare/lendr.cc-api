@@ -18,15 +18,12 @@ const userScheme = new mongoose.Schema({
     required: true
   },
   resetFlag: {
-    type: Boolean,
-    default: true
+    type: String,
+    default: ''
   },
 
   logins: [{
-    token: {
-      type: String,
-      required: true
-    },
+    _id: String,
     expires: {
       type: Date,
       default: Date.now() + 7 * 24 * 60 * 60 * 1000 // One week from now.
@@ -46,9 +43,9 @@ const userScheme = new mongoose.Schema({
      * @return {string} temporary password.
      */
     resetPassword() {
-      let tempPassword = randstr(12);
+      let tempPassword = randstr(16);
       this.setPassword(tempPassword);
-      this.resetFlag = true;
+      this.resetFlag = randstr(16);
 
       return tempPassword;
     },
@@ -58,6 +55,17 @@ const userScheme = new mongoose.Schema({
      */
     verifyPassword(password) {
       return bcrypt.compareSync(password, this.password);
+    },
+
+    /**
+     * Creates and adds a login token to the array.
+     * @return {object}
+     */
+    login() {
+      this.logins.push({
+        _id: randstr(64)
+      });
+      return this.logins[this.logins.length - 1];
     }
   }
 });
