@@ -54,7 +54,7 @@ loanSchema.virtual('total').get(function() {
   this.records.forEach(record => {
     total += record.amount;
   });
-  return total;
+  return Math.round(total * 10000) / 10000;
 });
 
 const Account = mongoose.model('loan', loanSchema);

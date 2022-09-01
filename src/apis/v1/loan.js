@@ -27,7 +27,7 @@ async function getIdsFromNames(names) {
   }
 }
 router.post('/create', async (req, res) => {
-  const member = secure(req, res, {
+  const member = await secure(req, res, {
     requireAdmin: true
   });
   if (member) {
@@ -45,6 +45,89 @@ router.post('/create', async (req, res) => {
     try {
       await loan.save();
       res.send(loan);
+    }
+    catch (err) {
+      res.status(501).send({ err: err });
+    }
+  }
+});
+
+/**
+ * Gets and updates a loan.
+ * @param {string} id 
+ */
+async function getAndUpdateLoan(id) {
+  const loan = await Loan.findById(id);
+  if (loan == null) {
+    return null;
+  }
+
+  if (loan.interest > 0) {
+    const now = new Date();
+    const lc = loan.lastCompounded;
+
+    const months = Math.max(0, (lc.getUTCMonth() + lc.getUTCFullYear() * 12) - (now.getUTCMonth() + now.getUTCFullYear() * 12));
+    for (let i = 0; i < months; i++) {
+      loan.records.push({
+        amount: Math.round((loan.total * loan.interest / 12) * 10000) / 10000,
+        memo: 'INTEREST',
+        method: 'auto'
+      });
+    }
+
+    if (months > 0) {
+      loan.lastCompounded = now;
+      await loan.save();
+    }
+  }
+
+  return loan;
+}
+router.get('/:id', async (req, res) => {
+  const member = await secure(req, res);
+  if (member) {
+    // Get loan.
+    const loan = await getAndUpdateLoan(req.params.id);
+    if (loan == null) {
+      res.status(404).send({ err: 'Loan does not exist.' });
+      return;
+    }
+
+    // Make sure logged in member has access.
+    if (member.role != "admin") {
+      let valid = false;
+      loan.borrowers.forEach(id => {
+        if (valid || id == member.id) {
+          valid = true;
+        }
+      });
+      if (!valid) {
+        res.status(403).send({ err: 'Access denied.' });
+        return;
+      }
+    }
+
+    // Send loan.
+    res.send(loan);
+  }
+});
+
+router.post('/:id/post', async (req, res) => {
+  const member = await secure(req, res, {
+    requireAdmin: true
+  });
+  if (member) {
+    // Get loan.
+    const loan = await getAndUpdateLoan(req.params.id);
+    if (loan == null) {
+      res.status(404).send({ err: 'Loan does not exist.' });
+      return;
+    }
+
+    loan.records.push(req.body);
+    try {
+      await loan.save();
+      res.send(loan.records[loan.records.length - 1]);
     }
     catch (err) {
       res.status(501).send({ err: err });
