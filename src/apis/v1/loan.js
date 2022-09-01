@@ -26,7 +26,7 @@ async function getIdsFromNames(names) {
     return false;
   }
 }
-router.get('/create', async (req, res) => {
+router.post('/create', async (req, res) => {
   const member = secure(req, res, {
     requireAdmin: true
   });
