@@ -24,7 +24,7 @@ app.use(require('./apis'));
 
 // 404 Fallback.
 app.use((req, res) => {
-  res.status(404).send({ err: `Cannot ${req.method.toUpperCase()} ${req.url}` })
+  res.status(404).send({ err: `Cannot ${req.method.toUpperCase()} ${req.url}` });
 });
 
 

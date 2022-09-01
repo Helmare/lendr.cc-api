@@ -1,5 +1,4 @@
 const Member = require('../models/member');
-
 async function getLoggedInMember(req) {
   // Setup auth header.
   const auth = req.header('Authorization');
@@ -20,7 +19,7 @@ async function getLoggedInMember(req) {
   // Get if login is expired.
   let expired = false;
   member.logins = member.logins.filter(login => {
-    if (login._id == tokens[1] && Date.now() <= login.expires.getDate()) {
+    if (login._id == tokens[1] && Date.now() > login.expires.getTime()) {
       expired = true;
       return false;
     }
@@ -36,5 +35,35 @@ async function getLoggedInMember(req) {
     return member;
   }
 }
+/**
+ * Secures the request by returning the current logged in member
+ * and sending a 401 error if not logged in.
+ * 
+ * @param {import('express').Request} req 
+ * @param {import('express').Response} res
+ * @param {object} opts
+ * @param {boolean} opts.requireAdmin whether or not being an admin is required
+ * @param {string[]} opts.requiredIds an array of ids which the logged in member must be any.
+ */
+async function secure(req, res, opts = {}) {
+  opts = {
+    requireAdmin: false,
+    ...opts
+  };
 
-module.exports = getLoggedInMember;
+  const member = await getLoggedInMember(req);
+  if (!member) {
+    res.status(401).send({ err: 'Access denied, must be logged in.' });
+    return null;
+  }
+
+  if (opts.requireAdmin && member.role != 'admin') {
+    res.status(403).send({ err: 'Access denied, must be an admin.' });
+    return null;
+  }
+  else {
+    return member;
+  }
+}
+
+module.exports = { getLoggedInMember, secure }
