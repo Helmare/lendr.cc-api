@@ -16,7 +16,7 @@ const loanSchema = new mongoose.Schema({
   borrowers: [mongoose.Types.ObjectId],
   createdAt: {
     type: Date,
-    default: Date.now()
+    default: Date.now
   },
 
   interest: {
@@ -25,7 +25,7 @@ const loanSchema = new mongoose.Schema({
   },
   lastCompounded: {
     type: Date,
-    default: Date.now()
+    default: Date.now
   },
 
   records: [{
@@ -41,7 +41,7 @@ const loanSchema = new mongoose.Schema({
     },
     createdAt: {
       type: Date,
-      default: Date.now()
+      default: Date.now
     }
   }],
 }, {

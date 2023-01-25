@@ -27,7 +27,9 @@ const memberSchema = new mongoose.Schema({
     _id: String,
     expires: {
       type: Date,
-      default: Date.now() + 7 * 24 * 60 * 60 * 1000 // One week from now.
+      default() {
+        return Date.now() + 7 * 24 * 60 * 60 * 1000; // One week from now.
+      }
     }
   }]
 }, {
