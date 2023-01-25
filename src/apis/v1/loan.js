@@ -68,14 +68,12 @@ async function getAndUpdateLoan(id) {
     const lc = loan.lastCompounded;
     const gped = loan.gracePeriodEndDate;
     
-    if (now >= gped.getTime()) {
+    if (now.getTime() >= gped.getTime()) {
       if (lc.getTime() < gped.getTime()) {
         lc.setTime(gped.getTime());
       }
 
       const months = Math.max(0, (now.getUTCMonth() + now.getUTCFullYear() * 12) - (lc.getUTCMonth() + lc.getUTCFullYear() * 12));
-      console.log(months);
-
       for (let i = 0; i < months; i++) {
         const createdAt = new Date(lc.getTime());
         createdAt.setUTCMonth(lc.getUTCMonth() + i + 1);
@@ -84,8 +82,6 @@ async function getAndUpdateLoan(id) {
         createdAt.setUTCMinutes(0);
         createdAt.setUTCSeconds(0);
         createdAt.setUTCMilliseconds(0);
-
-        console.log(createdAt);
 
         loan.records.push({
           amount: Math.round((loan.total * loan.interest / 12) * 10000) / 10000,
@@ -104,6 +100,7 @@ async function getAndUpdateLoan(id) {
 
   return loan;
 }
+
 router.get('/:id', async (req, res) => {
   const member = await secure(req, res);
   if (member) {
