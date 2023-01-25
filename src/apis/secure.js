@@ -1,17 +1,28 @@
 const Member = require('../models/member');
-async function getLoggedInMember(req) {
+/**
+ * Gets the login ID from the request.
+ * @param {import('express').Request} req 
+ * @return {string}
+ */
+function getLoginId(req) {
   // Setup auth header.
   const auth = req.header('Authorization');
   if (!auth) {
-    return null;
+    return undefined;
   }
   const tokens = auth.split(' ');
   if (tokens[0] != 'Bearer') {
-    return null;
+    return undefined;
   }
 
+  return tokens[1];
+}
+async function getLoggedInMember(req) {
+  // Get login id.
+  const loginId = getLoginId(req);
+
   // Get member from login id.
-  const member = await Member.findOne({ "logins._id": tokens[1] })
+  const member = await Member.findOne({ "logins._id": loginId })
   if (member == null) {
     return null;
   }
@@ -19,7 +30,7 @@ async function getLoggedInMember(req) {
   // Get if login is expired.
   let expired = false;
   member.logins = member.logins.filter(login => {
-    if (login._id == tokens[1] && Date.now() > login.expires.getTime()) {
+    if (login._id == loginId && Date.now() > login.expires.getTime()) {
       expired = true;
       return false;
     }
@@ -66,4 +77,4 @@ async function secure(req, res, opts = {}) {
   }
 }
 
-module.exports = { getLoggedInMember, secure }
+module.exports = { getLoginId, getLoggedInMember, secure }

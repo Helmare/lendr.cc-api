@@ -1,6 +1,6 @@
 const router = require('express').Router();
 const { Member } = require('../../models/all');
-const { secure } = require('../secure');
+const { getLoginId, secure } = require('../secure');
 
 // Creates a login instance for the member.
 router.post('/login', async (req, res) => {
@@ -60,6 +60,7 @@ router.put('/reset-password', async (req, res) => {
 router.post('/logout', async (req, res) => {
   const member = await secure(req, res);
   if (member) {
+    const loginId = getLoginId(req);
     member.logins = member.logins.filter(l => l._id != loginId);
     await member.save();
     res.send({ msg: 'Successfully logged out.' });
