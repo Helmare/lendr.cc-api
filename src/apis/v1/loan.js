@@ -62,22 +62,43 @@ async function getAndUpdateLoan(id) {
     return null;
   }
 
+  // Charge interest.
   if (loan.interest > 0) {
     const now = new Date();
     const lc = loan.lastCompounded;
+    const gped = loan.gracePeriodEndDate;
+    
+    if (now >= gped.getTime()) {
+      if (lc.getTime() < gped.getTime()) {
+        lc.setTime(gped.getTime());
+      }
 
-    const months = Math.max(0, (lc.getUTCMonth() + lc.getUTCFullYear() * 12) - (now.getUTCMonth() + now.getUTCFullYear() * 12));
-    for (let i = 0; i < months; i++) {
-      loan.records.push({
-        amount: Math.round((loan.total * loan.interest / 12) * 10000) / 10000,
-        memo: 'INTEREST',
-        method: 'auto'
-      });
-    }
+      const months = Math.max(0, (now.getUTCMonth() + now.getUTCFullYear() * 12) - (lc.getUTCMonth() + lc.getUTCFullYear() * 12));
+      console.log(months);
 
-    if (months > 0) {
-      loan.lastCompounded = now;
-      await loan.save();
+      for (let i = 0; i < months; i++) {
+        const createdAt = new Date(lc.getTime());
+        createdAt.setUTCMonth(lc.getUTCMonth() + i + 1);
+        createdAt.setUTCDate(1);
+        createdAt.setUTCHours(0);
+        createdAt.setUTCMinutes(0);
+        createdAt.setUTCSeconds(0);
+        createdAt.setUTCMilliseconds(0);
+
+        console.log(createdAt);
+
+        loan.records.push({
+          amount: Math.round((loan.total * loan.interest / 12) * 10000) / 10000,
+          memo: 'INTEREST',
+          method: 'auto',
+          createdAt: createdAt
+        });
+      }
+
+      if (months > 0) {
+        loan.lastCompounded = now;
+        await loan.save();
+      }
     }
   }
 

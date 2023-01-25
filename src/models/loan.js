@@ -23,6 +23,14 @@ const loanSchema = new mongoose.Schema({
     type: Number,
     default: 0
   },
+  gracePeriodEndDate: {
+    type: Date,
+    default() {
+      const now = new Date();
+      now.setUTCDate(now.getUTCDate() + 60);
+      return now;
+    }
+  },
   lastCompounded: {
     type: Date,
     default: Date.now
