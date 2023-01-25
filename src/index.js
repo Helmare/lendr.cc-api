@@ -7,6 +7,7 @@ require('dotenv').config();
 const app = express();
 app.use(require('helmet')());
 app.use(require('cors')());
+app.use(require('cookie-parser')());
 app.use(express.json());
 
 app.enable('trust proxy');

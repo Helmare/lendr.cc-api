@@ -1,11 +1,28 @@
 const Member = require('../models/member');
+
 /**
- * Gets the login ID from the request.
+ * Gets the login ID from the request cookies.
+ * 
  * @param {import('express').Request} req 
- * @return {string}
+ * @return {string | undefined}
  */
-function getLoginId(req) {
-  // Setup auth header.
+function getLoginIdFromCookies(req) {
+  // Check cookies for login id.
+  if (req.cookies.loginId) {
+    return req.cookies.loginId;
+  }
+  else {
+    return undefined;
+  }
+}
+/**
+ * Gets the login ID from the Authorization header.
+ * 
+ * @param {import('express').Request} req 
+ * @return {string | undefined}
+ */
+function getLoginIdFromAuth(req) {
+  // Check auth header.
   const auth = req.header('Authorization');
   if (!auth) {
     return undefined;
@@ -16,6 +33,14 @@ function getLoginId(req) {
   }
 
   return tokens[1];
+}
+/**
+ * Gets the login ID from the request.
+ * @param {import('express').Request} req 
+ * @return {string}
+ */
+function getLoginId(req) {
+  return getLoginIdFromCookies(req) || getLoginIdFromAuth(req);
 }
 async function getLoggedInMember(req) {
   // Get login id.
