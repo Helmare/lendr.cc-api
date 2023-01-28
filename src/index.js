@@ -36,5 +36,5 @@ mongoose.connect(process.env.DB_HOST, {
 }).then(() => {
   // Start app after connection.
   const port = process.env.PORT || 3000;
-  app.listen(port, () => console.log(`Running api.happiiloans.com on port ${port}.`));
+  app.listen(port, () => console.log(`Running api.lendr.cc on port ${port}.`));
 }).catch((err) => console.error(err));
