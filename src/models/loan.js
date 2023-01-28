@@ -11,7 +11,7 @@ const loanSchema = new mongoose.Schema({
 
   memo: {
     type: String,
-    default: 'Personal Loan'
+    required: true
   },
   borrowers: [mongoose.Types.ObjectId],
   createdAt: {
@@ -43,7 +43,7 @@ const loanSchema = new mongoose.Schema({
     },
     type: {
       type: String,
-      enum: ['principle', 'interest', 'payment', 'adjustment'],
+      enum: ['principal', 'interest', 'payment', 'adjustment'],
       required: true
     },
     createdAt: {

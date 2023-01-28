@@ -30,17 +30,33 @@ router.post('/create', async (req, res) => {
     requireAdmin: true
   });
   if (member) {
+    // Check for required data
+    if (!req.body.memo) {
+      res.status(400).send({ err: "Invalid memo." });
+      return;
+    }
+    if (!req.body.principal) {
+      res.status(400).send({ err: "Invalid principal." });
+      return;
+    }
+
     // Convert borrower usernames to ids.
     const borrowers = await getIdsFromNames(req.body.borrowers);
     if (!borrowers) {
       res.status(400).send({ err: 'Invalid borrowers.' });
       return;
     }
-    else {
-      req.body.borrowers = borrowers;
-    }
 
-    const loan = new Loan(req.body);
+    // Create the loan.
+    const loan = new Loan({
+      memo: req.body.memo,
+      borrowers: borrowers
+    });
+    loan.records.push({
+      amount: req.body.principal,
+      type: 'principal'
+    });
+
     try {
       await loan.save();
       res.send(loan);
