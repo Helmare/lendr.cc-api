@@ -9,7 +9,7 @@ router.post('/login', async (req, res) => {
     return;
   }
   if (!req.body.password) {
-    res.status(400).send({ 'err': 'Missing password' });
+    res.status(400).send({ 'err': 'Missing password.' });
     return;
   }
 
@@ -85,8 +85,19 @@ router.get('/me', async (req, res) => {
     delete obj.password
     delete obj.logins;
 
+    // TODO: Show loans and loan total.
+
     res.send(obj);
   }
+});
+
+// An endpoint for displaying basic information for all members (admin only).
+router.get('/all', async (req, res) => {
+
+});
+// An endpoint for displaying a member's information (admin only).
+router.get('/:id', async (req, res) => {
+  // TODO
 });
 
 module.exports = router;
