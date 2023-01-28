@@ -1,6 +1,5 @@
 const router = require('express').Router();
 const { Member, Loan } = require('../../models/all');
-const { listeners } = require('../../models/member');
 const { secure } = require('../secure');
 
 /**
@@ -34,7 +33,7 @@ router.post('/create', async (req, res) => {
     // Convert borrower usernames to ids.
     const borrowers = await getIdsFromNames(req.body.borrowers);
     if (!borrowers) {
-      res.status(400).send({ err: 'Invalid borrowers' });
+      res.status(400).send({ err: 'Invalid borrowers.' });
       return;
     }
     else {
@@ -66,11 +65,11 @@ async function getAndUpdateLoan(id) {
   if (loan.interest > 0) {
     const now = new Date();
     const lc = loan.lastCompounded;
-    const gped = loan.gracePeriodEndDate;
+    const gpe = loan.gracePeriodEnd;
     
-    if (now.getTime() >= gped.getTime()) {
-      if (lc.getTime() < gped.getTime()) {
-        lc.setTime(gped.getTime());
+    if (now.getTime() >= gpe.getTime()) {
+      if (lc.getTime() < gpe.getTime()) {
+        lc.setTime(gpe.getTime());
       }
 
       const months = Math.max(0, (now.getUTCMonth() + now.getUTCFullYear() * 12) - (lc.getUTCMonth() + lc.getUTCFullYear() * 12));

@@ -5,11 +5,11 @@ const loanSchema = new mongoose.Schema({
   _id: {
     type: String,
     default() {
-      return randstr(6)
+      return randstr(8)
     }
   },
 
-  title: {
+  memo: {
     type: String,
     default: 'Personal Loan'
   },
@@ -23,7 +23,7 @@ const loanSchema = new mongoose.Schema({
     type: Number,
     default: 0
   },
-  gracePeriodEndDate: {
+  gracePeriodEnd: {
     type: Date,
     default() {
       const now = new Date();
@@ -41,11 +41,10 @@ const loanSchema = new mongoose.Schema({
       type: Number,
       required: true
     },
-    memo: String,
-    method: {
+    type: {
       type: String,
-      enum: ['manual', 'auto', 'paypal'],
-      default: 'manual'
+      enum: ['principle', 'interest', 'payment', 'adjustment'],
+      required: true
     },
     createdAt: {
       type: Date,
