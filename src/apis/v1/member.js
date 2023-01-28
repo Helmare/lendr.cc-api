@@ -68,7 +68,7 @@ router.post('/logout', async (req, res) => {
 });
 // Clears all login instances of the current member.
 router.post('/logout-all', async (req, res) => {
-  const member = await sec.secure(req, res);
+  const member = await secure(req, res);
   if (member) {
     member.logins = [];
     await member.save();
