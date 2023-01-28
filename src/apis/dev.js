@@ -67,7 +67,7 @@ router.get('/member/:id', (req, res) => {
     }
   });
 });
-router.put('/member/:id/reset', (req, res) => {
+router.patch('/member/:id/reset', (req, res) => {
   Member.findById(req.params.id).then(member => {
     if (member) {
       const tempPassword = member.resetPassword();

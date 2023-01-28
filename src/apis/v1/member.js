@@ -33,7 +33,7 @@ router.post('/login', async (req, res) => {
 });
 
 // Resets the password of someone who needs it reset.
-router.put('/reset-password', async (req, res) => {
+router.patch('/reset-password', async (req, res) => {
   if (!req.body.resetFlag) {
     res.status(400).send({ err: 'Missing resetFlag.' });
     return;
