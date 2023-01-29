@@ -1,6 +1,6 @@
 const router = require('express').Router();
-const { Member } = require('../../models/all');
-const { getLoginId, secure } = require('../secure');
+const { Member } = require('../../../models/all');
+const { getLoginId, secure } = require('../../secure');
 
 // Creates a login instance for the member.
 router.post('/login', async (req, res) => {
@@ -31,7 +31,6 @@ router.post('/login', async (req, res) => {
     res.send({ 'err': 'Invalid username or password.' });
   }
 });
-
 // Resets the password of someone who needs it reset.
 router.patch('/reset-password', async (req, res) => {
   if (!req.body.resetFlag) {
@@ -55,7 +54,6 @@ router.patch('/reset-password', async (req, res) => {
     res.send({ msg: 'Successfully changed password.' });
   }
 });
-
 // Logs out of the current member.
 router.post('/logout', async (req, res) => {
   const member = await secure(req, res);
@@ -74,30 +72,6 @@ router.post('/logout-all', async (req, res) => {
     await member.save();
     res.send({ msg: 'Successfully logged out of everything.' });
   }
-});
-
-// An endpoint for checking whether you are logged in, returns the member logged in.
-router.get('/me', async (req, res) => {
-  const member = await secure(req, res);
-  if (member) {
-    const obj = member.toObject();
-    delete obj.resetFlag
-    delete obj.password
-    delete obj.logins;
-
-    // TODO: Show loans and loan total.
-
-    res.send(obj);
-  }
-});
-
-// An endpoint for displaying basic information for all members (admin only).
-router.get('/all', async (req, res) => {
-
-});
-// An endpoint for displaying a member's information (admin only).
-router.get('/:id', async (req, res) => {
-  // TODO
 });
 
 module.exports = router;
