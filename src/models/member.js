@@ -49,7 +49,8 @@ const memberSchema = new mongoose.Schema({
       let tempPassword = randstr(16);
       this.setPassword(tempPassword);
       this.resetFlag = randstr(64);
-
+      this.logins = [];
+      
       return tempPassword;
     },
     /**
