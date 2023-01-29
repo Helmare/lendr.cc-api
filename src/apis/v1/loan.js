@@ -77,7 +77,6 @@ router.post('/create', async (req, res) => {
     }
   }
 });
-
 /**
  * Gets and updates a loan.
  * @param {string} id 
@@ -120,7 +119,6 @@ router.get('/:id', async (req, res) => {
     res.send(loan);
   }
 });
-
 router.post('/:id/post', async (req, res) => {
   const member = await secure(req, res, {
     requireAdmin: true

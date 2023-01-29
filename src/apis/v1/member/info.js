@@ -9,7 +9,13 @@ const { secure } = require('../../secure');
  * @param {string | import('mongoose').Types.ObjectId} memberId 
  */
 async function getMembersLoans(memberId) {
-  const loans = await Loan.find({ borrowers: memberId });
+  let loans;
+  if (memberId) {
+    loans = await Loan.find({ borrowers: memberId });
+  }
+  else {
+    loans = await Loan.find({});
+  }
 
   // Calculate total.
   let total = 0;
@@ -66,7 +72,7 @@ router.get('/me', async (req, res) => {
 router.get('/me/loans', async (req, res) => {
   const member = await secure(req, res);
   if (member) {
-    res.send(await getMembersLoans(member._id));
+    res.send(await getMembersLoans(member.role == "admin" ? null : member._id));
   }
 });
 // An endpoint for getting the logged in member's activity.
