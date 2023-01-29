@@ -125,5 +125,5 @@ loanSchema.virtual('total').get(function() {
   return Math.round(total * 10000) / 10000;
 });
 
-const Account = mongoose.model('loan', loanSchema);
-module.exports = Account;
+const Loan = mongoose.model('loan', loanSchema);
+module.exports = Loan;

@@ -1,5 +1,7 @@
+const ACTIVITY_PER_PAGE = 7;
+
 const router = require('express').Router();
-const { Member, Loan } = require('../../../models/all');
+const { Member, Loan, Activity } = require('../../../models/all');
 const { secure } = require('../../secure');
 
 /**
@@ -21,6 +23,21 @@ async function getMembersLoans(memberId) {
   return {
     total, upcomingInterest, loans
   };
+}
+/**
+ * Gets all the activity for a member.
+ * @param {string | import('mongoose').Types.ObjectId} memberId
+ * @param {Number} page
+ */
+async function getMembersActivity(memberId, page) {
+  const p = page || 0;
+  const activity = await Activity.find(
+    { $or: [{ members: memberId }, { broadcast: true }] }, 
+    null, 
+    { sort: { createdAt: -1 }, skip: page * ACTIVITY_PER_PAGE, limit: ACTIVITY_PER_PAGE }
+  );
+
+  return activity;
 }
 
 // An endpoint for displaying basic information for all members (admin only).
@@ -52,6 +69,15 @@ router.get('/me/loans', async (req, res) => {
     res.send(await getMembersLoans(member._id));
   }
 });
+// An endpoint for getting the logged in member's activity.
+router.get('/me/activity', async (req, res) => {
+  const member = await secure(req, res);
+  if (member) {
+    res.send({
+      activity: await getMembersActivity(member._id)
+    });
+  }
+});
 
 // An endpoint for displaying a member's information (admin only).
 router.get('/:id', async (req, res) => {
@@ -73,6 +99,17 @@ router.get('/:id/loans', async(req, res) => {
     res.send(
       await getMembersLoans(req.params.id)
     );
+  }
+});
+// An endpoint for getting a member's activity.
+router.get('/:id/activity', async(req, res) => {
+  const member = await secure(req, res, {
+    requireAdmin: true
+  });
+  if (member) {
+    res.send({
+      activity: await getMembersActivity(req.params.id)
+    });
   }
 });
 

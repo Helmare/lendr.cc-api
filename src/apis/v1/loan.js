@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const { Member, Loan } = require('../../models/all');
+const { Member, Loan, Activity } = require('../../models/all');
 const { secure } = require('../secure');
 
 /**
@@ -59,6 +59,17 @@ router.post('/create', async (req, res) => {
 
     try {
       await loan.save();
+
+      // Create activity
+      const activity = new Activity({
+        members: borrowers,
+        type: 'loan',
+        memo: req.body.memo,
+        amount: req.body.principal,
+        affectedLoans: [loan._id]
+      });
+      await activity.save();
+
       res.send(loan);
     }
     catch (err) {
