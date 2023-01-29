@@ -23,6 +23,15 @@ async function getMembersLoans(memberId) {
   };
 }
 
+// An endpoint for displaying basic information for all members (admin only).
+router.get('/all', async (req, res) => {
+  if (await secure(req, res, { requireAdmin: true })) {
+    res.send({
+      members: await Member.find({}, { username: 1, role: 1 })
+    });
+  }
+});
+
 // An endpoint for checking whether you are logged in, returns the member logged in.
 router.get('/me', async (req, res) => {
   const member = await secure(req, res);
@@ -65,11 +74,6 @@ router.get('/:id/loans', async(req, res) => {
       await getMembersLoans(req.params.id)
     );
   }
-});
-
-// An endpoint for displaying basic information for all members (admin only).
-router.get('/all', async (req, res) => {
-  res.status(501).send({ err: "Not Implemented" });
 });
 
 module.exports = router;
