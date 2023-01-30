@@ -8,6 +8,10 @@ const loanSchema = new mongoose.Schema({
       return randstr(8)
     }
   },
+  archived: {
+    type: Boolean,
+    default: false
+  },
 
   memo: {
     type: String,

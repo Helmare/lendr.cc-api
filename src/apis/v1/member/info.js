@@ -29,7 +29,7 @@ async function memberExists(memberId) {
 async function getMembersLoans(memberId) {
   let loans;
   if (memberId) {
-    loans = await Loan.find({ borrowers: memberId });
+    loans = await Loan.find({ borrowers: memberId, $or: [{archived: false}, {archived: { $exists: false }}] });
   }
   else {
     loans = await Loan.find({});
@@ -170,7 +170,7 @@ router.post('/:id/payment', async (req, res) => {
   }
 
   const loans = await Loan.find(
-    { borrowers: req.params.id },
+    { borrowers: req.params.id, $or: [{archived: false}, {archived: { $exists: false }}] },
     null,
     { sort: { interest: -1 } }
   );
@@ -180,9 +180,12 @@ router.post('/:id/payment', async (req, res) => {
   let affectedLoans = [];
   await loans.forEach(async (loan) => {
     await loan.chargeInterest();
-    if (amount == 0 || loan.total == 0) return;
+    if (amount == 0) return;
 
-    if (loan.total >= -amount) {
+    if (loan.total == 0) {
+      loan.archived = true;
+    }
+    else if (loan.total > -amount) {
       loan.records.push({
         type: 'payment',
         amount: amount
@@ -195,6 +198,7 @@ router.post('/:id/payment', async (req, res) => {
         type: 'payment',
         amount: -loan.total
       });
+      loan.archived = true;
     }
 
     affectedLoans.push(loan._id);

@@ -88,7 +88,7 @@ router.post('/create', async (req, res) => {
  */
 async function getAndUpdateLoan(id) {
   const loan = await Loan.findById(id);
-  if (loan == null) {
+  if (loan == null || !loan.archived) {
     return null;
   }
   
