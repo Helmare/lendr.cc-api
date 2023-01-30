@@ -5,6 +5,24 @@ const { Member, Loan, Activity } = require('../../../models/all');
 const { secure } = require('../../secure');
 
 /**
+ * Checks whether a member exists.
+ * @param {string | import('mongoose').Types.ObjectId} memberId 
+ * @returns {boolean}
+ */
+async function memberExists(memberId) {
+  try {
+    if (await Member.findById(memberId)) {
+      return true;
+    }
+    else {
+      return false;
+    }
+  }
+  catch {
+    return false;
+  }
+}
+/**
  * Gets all the loans for a member.
  * @param {string | import('mongoose').Types.ObjectId} memberId 
  */
@@ -91,9 +109,13 @@ router.get('/:id', async (req, res) => {
     requireAdmin: true
   });
   if (member) {
-    res.send(
-      await Member.findById(req.params.id, { username: 1, role: 1 })
-    );
+    const m = await Member.findById(req.params.id, { username: 1, role: 1 });
+    if (m) {
+      res.send(m);
+    }
+    else {
+      res.status(404).send({ err: "Member does not exist." });
+    }
   }
 });
 // An endpoint for getting a member's loans.
@@ -102,6 +124,11 @@ router.get('/:id/loans', async(req, res) => {
     requireAdmin: true
   });
   if (member) {
+    if (!memberExists(req.params.id)) {
+      res.status(404).send({ err: "Member does not exist." });
+      return;
+    }
+
     res.send(
       await getMembersLoans(req.params.id)
     );
@@ -113,6 +140,11 @@ router.get('/:id/activity', async(req, res) => {
     requireAdmin: true
   });
   if (member) {
+    if (!memberExists(req.params.id)) {
+      res.status(404).send({ err: "Member does not exist." });
+      return;
+    }
+
     res.send({
       activity: await getMembersActivity(req.params.id)
     });
@@ -127,7 +159,7 @@ router.post('/:id/payment', async (req, res) => {
   if (!member) return;
 
   // Check if member exists.
-  if (!(await Member.findById(req.params.id))) {
+  if (!memberExists(req.params.id)) {
     res.status(404).send({ err: "Member does not exist." });
     return;
   }
