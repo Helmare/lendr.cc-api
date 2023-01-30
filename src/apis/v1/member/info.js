@@ -40,7 +40,7 @@ async function getMembersActivity(memberId, page) {
   const activity = await Activity.find(
     { $or: [{ members: memberId }, { broadcast: true }] }, 
     null, 
-    { sort: { createdAt: -1 }, skip: page * ACTIVITY_PER_PAGE, limit: ACTIVITY_PER_PAGE }
+    { sort: { createdAt: -1 }, skip: p * ACTIVITY_PER_PAGE, limit: ACTIVITY_PER_PAGE }
   );
 
   return activity;

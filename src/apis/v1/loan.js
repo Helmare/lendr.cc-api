@@ -47,13 +47,18 @@ router.post('/create', async (req, res) => {
       return;
     }
 
-    // Create the loan.
+    // Prepare body.
+    const principal = req.body.principal;
+    delete req.body.principal;
+    delete req.body.borrowers;
+
+    // Create loan.
     const loan = new Loan({
-      memo: req.body.memo,
-      borrowers: borrowers
+      borrowers: borrowers,
+      ...req.body
     });
     loan.records.push({
-      amount: req.body.principal,
+      amount: principal,
       type: 'principal'
     });
 
@@ -65,7 +70,7 @@ router.post('/create', async (req, res) => {
         members: borrowers,
         type: 'loan',
         memo: req.body.memo,
-        amount: req.body.principal,
+        amount: principal,
         affectedLoans: [loan._id]
       });
       await activity.save();
