@@ -101,7 +101,6 @@ const loanSchema = new mongoose.Schema({
 
           this.records.push({
             amount: Math.round((this.total * this.interest / 12) * 10000) / 10000,
-            memo: 'INTEREST',
             type: 'interest',
             createdAt: createdAt
           });

@@ -20,8 +20,8 @@ async function getMembersLoans(memberId) {
   // Calculate total.
   let total = 0;
   let upcomingInterest = 0;
-  loans.forEach(loan => {
-    loan.chargeInterest();
+  await loans.forEach(async (loan) => {
+    await loan.chargeInterest();
     total += loan.total;
     upcomingInterest += loan.calcInterest();
   });
@@ -117,6 +117,70 @@ router.get('/:id/activity', async(req, res) => {
       activity: await getMembersActivity(req.params.id)
     });
   }
+});
+
+// An endpoint for accepting member-wise payments.
+router.post('/:id/payment', async (req, res) => {
+  const member = await secure(req, res, {
+    requireAdmin: true
+  });
+  if (!member) return;
+
+  // Check if member exists.
+  if (!(await Member.findById(req.params.id))) {
+    res.status(404).send({ err: "Member does not exist." });
+    return;
+  }
+
+  if (!req.body.amount || req.body.amount >= 0) {
+    res.status(401).send({ err: 'Amount value must be less than 0.' });
+    return;
+  }
+
+  const loans = await Loan.find(
+    { borrowers: req.params.id },
+    null,
+    { sort: { interest: -1 } }
+  );
+
+  // Pay off loans.
+  let amount = req.body.amount;
+  let affectedLoans = [];
+  await loans.forEach(async (loan) => {
+    await loan.chargeInterest();
+    if (amount == 0 || loan.total == 0) return;
+
+    if (loan.total >= -amount) {
+      loan.records.push({
+        type: 'payment',
+        amount: amount
+      });
+      amount = 0;
+    }
+    else {
+      amount += loan.total;
+      loan.records.push({
+        type: 'payment',
+        amount: -loan.total
+      });
+    }
+
+    affectedLoans.push(loan._id);
+    await loan.save();
+  });
+
+  // Create activity.
+  const activity = new Activity({
+    member: [req.params.id],
+    memo: "PAYMENT",
+    type: "payment",
+    amount: req.body.amount,
+    affectedLoans: affectedLoans
+  });
+  await activity.save();
+
+  // Send success
+  res.send({ msg: "Successfully created payment.", amount: amount });
 });
 
 module.exports = router;
