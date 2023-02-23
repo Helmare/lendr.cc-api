@@ -207,7 +207,7 @@ router.post('/:id/payment', async (req, res) => {
 
   // Create activity.
   const activity = new Activity({
-    member: [req.params.id],
+    members: [req.params.id],
     memo: "PAYMENT",
     type: "payment",
     amount: req.body.amount,
