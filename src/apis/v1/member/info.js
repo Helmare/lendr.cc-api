@@ -69,7 +69,7 @@ async function getMembersActivity(memberId, page) {
 router.get('/all', async (req, res) => {
   if (await secure(req, res, { requireAdmin: true })) {
     res.send({
-      members: await Member.find({}, { username: 1, role: 1 })
+      members: await Member.find({}, { username: 1, role: 1, email: 1 })
     });
   }
 });
@@ -106,6 +106,38 @@ router.get('/me/activity', async (req, res) => {
     res.send({
       activity: await getMembersActivity(member._id)
     });
+  }
+});
+
+// A temporary endpoint for testing emails.
+router.post('/me/test-email', async (req, res) => {
+  const member = await secure(req, res);
+  if (member) {
+    try {
+      const info = await member.sendMail({
+        subject: 'Password Reset',
+        html: 
+         `<h2>Password Reset</h2>
+          <p>You're receiving this email because your <span style="color: #9029f4">lendr.cc</span> password was reset.</p>
+          <p>To login, goto <a href="https://www.lendr.cc/login">https://www.lendr.cc/login</a> and use the following to login:</p>
+          <br>
+          <p style="font-family: monospace">Username: <strong>chris</strong></p>
+          <p style="font-family: monospace">Password: <strong>SEjao2039Askjcu</strong></p>
+          <br>
+          <p>You'll be prompted to create a new password afterwords.</p>`
+      });
+
+      if (info) {
+        res.send(info);
+      }
+      else {
+        res.send({ msg: 'Member does not have an email address.' });
+      }
+    }
+    catch (err) {
+      console.log(err);
+      res.status(500).send(err);
+    }
   }
 });
 

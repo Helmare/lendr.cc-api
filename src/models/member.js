@@ -1,6 +1,15 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const randstr = require('../randstr');
+const transporter = require('nodemailer').createTransport({
+  host: process.env.MAIL_HOST,
+  port: process.env.MAIL_PORT,
+  auth: {
+    user: process.env.MAIL_USER,
+    pass: process.env.MAIL_PASS
+  },
+  tls: { rejectUnauthorized: false }
+});
 
 const memberSchema = new mongoose.Schema({
   username: {
@@ -12,6 +21,10 @@ const memberSchema = new mongoose.Schema({
     type: String,
     enum: ['admin', 'borrower'],
     default: 'borrower'
+  },
+  email: {
+    type: String,
+    default: ''
   },
 
   password: {
@@ -70,6 +83,36 @@ const memberSchema = new mongoose.Schema({
         _id: randstr(64)
       });
       return this.logins[this.logins.length - 1];
+    },
+
+    /**
+     * Email this user if they have an email.
+     * @param {import('nodemailer').SendMailOptions} mailOptions 
+     */
+    async sendMail(mailOptions) {
+      return new Promise((resolve, reject) => {
+        if (this.email) {
+          // Change 'to' to the member email.
+          mailOptions = {
+            from: 'Lendr <noreply@lendr.cc>',
+            to: this.email,
+            ...mailOptions
+          };
+
+          // Send mail.
+          transporter.sendMail(mailOptions, (err, info) => {
+            if (err) {
+              reject(err);
+            }
+            else {
+              resolve(info);
+            }
+          });
+        }
+        else {
+          resolve(undefined);
+        }
+      });
     }
   }
 });
