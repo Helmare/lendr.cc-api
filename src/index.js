@@ -11,14 +11,18 @@ app.use(require('cookie-parser')());
 app.use(express.json());
 
 app.enable('trust proxy');
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 100,
-  message: {
-    'err': 'Too many requests.'
-  }
-});
-app.use(limiter);
+
+const limit = process.env.REQUEST_LIMIT ? Number.parseInt(process.env.REQUEST_LIMIT) : 100;
+if (limit > 0) {
+  const limiter = rateLimit({
+    windowMs: 60 * 1000,
+    max: limit,
+    message: {
+      'err': 'Too many requests.'
+    }
+  });
+  app.use(limiter);
+}
 
 // TODO: Add API's
 app.use(require('./apis'));
