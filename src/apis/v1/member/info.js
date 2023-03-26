@@ -33,7 +33,7 @@ async function getMembersLoans(memberId) {
     loans = await Loan.find({ borrowers: memberId, $or: [{archived: false}, {archived: { $exists: false }}] });
   }
   else {
-    loans = await Loan.find({});
+    loans = await Loan.find({ $or: [{archived: false}, {archived: { $exists: false }}] });
   }
 
   // Calculate total.
@@ -73,6 +73,11 @@ router.get('/all', async (req, res) => {
     });
   }
 });
+router.get('/all/loans', async (req, res) => {
+  if (await secure(req, res, { requireAdmin: true })) {
+    res.send(await getMembersLoans());
+  }
+});
 
 // An endpoint for checking whether you are logged in, returns the member logged in.
 router.get('/me', async (req, res) => {
@@ -91,7 +96,7 @@ router.get('/me', async (req, res) => {
 router.get('/me/loans', async (req, res) => {
   const member = await secure(req, res);
   if (member) {
-    res.send(await getMembersLoans(member.role == "admin" ? null : member._id));
+    res.send(await getMembersLoans(member._id));
   }
 });
 // An endpoint for getting the logged in member's activity.
