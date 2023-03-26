@@ -1,6 +1,7 @@
 const ACTIVITY_PER_PAGE = 7;
 
 const router = require('express').Router();
+const { isValidObjectId } = require('mongoose');
 const { Member, Loan, Activity } = require('../../../models/all');
 const { secure } = require('../../secure');
 
@@ -109,6 +110,11 @@ router.get('/:id', async (req, res) => {
     requireAdmin: true
   });
   if (member) {
+    if (!isValidObjectId(req.params.id)) {
+      res.status(400).send({ err: 'Invalid member id.' });
+      return;
+    }
+
     const m = await Member.findById(req.params.id, { username: 1, role: 1 });
     if (m) {
       res.send(m);
@@ -124,6 +130,10 @@ router.get('/:id/loans', async(req, res) => {
     requireAdmin: true
   });
   if (member) {
+    if (!isValidObjectId(req.params.id)) {
+      res.status(400).send({ err: 'Invalid member id.' });
+      return;
+    }
     if (!memberExists(req.params.id)) {
       res.status(404).send({ err: "Member does not exist." });
       return;
@@ -140,6 +150,10 @@ router.get('/:id/activity', async(req, res) => {
     requireAdmin: true
   });
   if (member) {
+    if (!isValidObjectId(req.params.id)) {
+      res.status(400).send({ err: 'Invalid member id.' });
+      return;
+    }
     if (!memberExists(req.params.id)) {
       res.status(404).send({ err: "Member does not exist." });
       return;
@@ -156,14 +170,17 @@ router.post('/:id/payment', async (req, res) => {
   const member = await secure(req, res, {
     requireAdmin: true
   });
-  if (!member) return;
 
-  // Check if member exists.
+  // Validate
+  if (!member) return;
+  if (!isValidObjectId(req.params.id)) {
+    res.status(400).send({ err: 'Invalid member id.' });
+    return;
+  }
   if (!memberExists(req.params.id)) {
     res.status(404).send({ err: "Member does not exist." });
     return;
   }
-
   if (!req.body.amount || req.body.amount >= 0) {
     res.status(401).send({ err: 'Amount value must be less than 0.' });
     return;
