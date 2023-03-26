@@ -48,7 +48,7 @@ router.post('/create', async (req, res) => {
       res.send(loan);
     }
     catch (err) {
-      res.status(501).send({ err: err.message });
+      res.status(500).send({ err: err.message });
     }
   }
 });
