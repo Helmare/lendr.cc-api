@@ -65,11 +65,11 @@ router.post('/create', async (req, res) => {
         });
 
         await borrower.sendMail({
-          subject: 'New Loan Created!',
+          subject: 'Loan Confirmation',
           html: `
-          <h2>New Loan Created!</h2>
-          <p>A new loan was created on your lendr.cc account for <span style="color: #9029f4; font-weight: bold">\$${emPrincipal}</span></p>
-          <p>Information about your loan can be found below or at <a href="https://www.lendr.cc/loan/${loan._id}">https://www.lendr.cc/loan/${loan._id}</a></p>
+          <h2>Loan Confirmation</h2>
+          <p>A new loan was created on your lendr.cc account for <span style="color: #9029f4; font-weight: bold">\$${emPrincipal}</span>.</p>
+          <p>Information regarding your loan can be found below or on <a href="https://www.lendr.cc">https://www.lendr.cc</a></p>
           <div style="font-family: monospace; margin-top: 2em;">
             <p>ID: <strong>${loan._id}</strong></p>
             <p>Memo: <strong>${loan.memo}</strong></p>

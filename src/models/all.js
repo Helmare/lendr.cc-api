@@ -8,16 +8,21 @@ module.exports = {
   Member, Loan, Activity,
 
   /**
+   * @callback loanCallback
+   * @param {Loan} loan
+   */
+  /**
    * Gets all the loans for a member.
    * @param {string | import('mongoose').Types.ObjectId} memberId 
+   * @param {import('mongoose').QueryOptions} options
    */
-  async getMembersLoans(memberId) {
+  async getMembersLoans(memberId, options) {
     let loans;
     if (memberId) {
-      loans = await Loan.find({ borrowers: memberId, $or: [{archived: false}, {archived: { $exists: false }}] });
+      loans = await Loan.find({ borrowers: memberId, $or: [{archived: false}, {archived: { $exists: false }}] }, null, options);
     }
     else {
-      loans = await Loan.find({ $or: [{archived: false}, {archived: { $exists: false }}] });
+      loans = await Loan.find({ $or: [{archived: false}, {archived: { $exists: false }}] }, null, options);
     }
 
     // Calculate total.

@@ -182,17 +182,15 @@ router.post('/:id/payment', async (req, res) => {
     return;
   }
 
-  const loans = await Loan.find(
-    { borrowers: req.params.id, $or: [{archived: false}, {archived: { $exists: false }}] },
-    null,
-    { sort: { interest: -1 } }
-  );
+  const memberLoans = await getMembersLoans(req.params.id, {
+    sort: { interest: -1 }
+  });
 
   // Pay off loans.
+  /** @type {number} */
   let amount = req.body.amount;
   let affectedLoans = [];
-  await loans.forEach(async (loan) => {
-    await loan.chargeInterest();
+  await memberLoans.loans.forEach(async (loan) => {
     if (amount == 0) return;
 
     if (loan.total == 0) {
@@ -203,9 +201,11 @@ router.post('/:id/payment', async (req, res) => {
         type: 'payment',
         amount: amount
       });
+      memberLoans.total += amount;
       amount = 0;
     }
     else {
+      memberLoans.total -= loan.total;
       amount += loan.total;
       loan.records.push({
         type: 'payment',
@@ -228,8 +228,37 @@ router.post('/:id/payment', async (req, res) => {
   });
   await activity.save();
 
-  // Send success
-  res.send({ msg: "Successfully created payment.", amount: amount });
+  try {
+    const borrower = await Member.findById(req.params.id);
+    const emAmount = (-req.body.amount).toLocaleString('en-US', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
+    const emAccountTotal = memberLoans.total.toLocaleString('en-US', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
+
+    // Send email
+    borrower.sendMail({
+      subject: 'Payment Confirmation',
+      html: `
+      <h2>Payment Confirmation</h2>
+      <p>Your payment for <span style="color: #9029f4; font-weight: bold">\$${emAmount}</span> was received!</p>
+      <p>Information regarding your payment can be found below or on <a href="https://www.lendr.cc">https://www.lendr.cc</a>.</p>
+      <div style="font-family: monospace; margin-top: 2em;">
+        <p>Amount: <strong>\$${emAmount}</strong></p>
+        <p>Account Total: <strong>\$${emAccountTotal}</strong></p>
+      </div>
+      `
+    });
+
+    // Send success
+    res.send({ msg: "Successfully created payment.", amount: amount });
+  }
+  catch (err) {
+    res.status(500).send({ err: err.message })
+  }
 });
 
 module.exports = router;
