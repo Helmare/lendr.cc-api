@@ -108,7 +108,7 @@ const memberSchema = new mongoose.Schema({
             if (content.info) {
               html += '\n<div style="font-family: monospace; margin-top: 2em; margin-bottom: 2em">';
               content.info.forEach(str => {
-                html += `\n\t<p>${str}</p>`
+                html += str ? `\n\t<p>${str}</p>` : '<br>'
               });
               html += '\n</div>';
             }
