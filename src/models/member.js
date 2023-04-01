@@ -92,6 +92,37 @@ const memberSchema = new mongoose.Schema({
     async sendMail(mailOptions) {
       return new Promise((resolve, reject) => {
         if (this.email) {
+          // Compile HTML
+          if (mailOptions.content && !mailOptions.html) {
+            const content = mailOptions.content;
+            let html = `<h2>${mailOptions.subject}</h2>`;
+
+            // Add header
+            if (content.header) {
+              content.header.forEach(str => {
+                html += `\n<p>${str}</p>`
+              });
+            }
+
+            // Add info
+            if (content.info) {
+              html += '\n<div style="font-family: monospace; margin-top: 2em; margin-bottom: 2em">';
+              content.info.forEach(str => {
+                html += `\n\t<p>${str}</p>`
+              });
+              html += '\n</div>';
+            }
+
+            // Add footer
+            if (content.footer) {
+              content.footer.forEach(str => {
+                html += `\n<p>${str}</p>`
+              });
+            }
+
+            mailOptions.html = html;
+          }
+
           // Change 'to' to the member email.
           mailOptions = {
             from: 'Lendr <noreply@lendr.cc>',

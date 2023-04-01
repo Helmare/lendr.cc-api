@@ -75,15 +75,19 @@ router.post('/me/test-email', async (req, res) => {
     try {
       const info = await member.sendMail({
         subject: 'Password Reset',
-        html: 
-         `<h2>Password Reset</h2>
-          <p>You're receiving this email because your <span style="color: #9029f4">lendr.cc</span> password was reset.</p>
-          <p>To login, goto <a href="https://www.lendr.cc/login">https://www.lendr.cc/login</a> and use the following to login:</p>
-          <br>
-          <p style="font-family: monospace">Username: <strong>chris</strong></p>
-          <p style="font-family: monospace">Password: <strong>SEjao2039Askjcu</strong></p>
-          <br>
-          <p>You'll be prompted to create a new password afterwords.</p>`
+        content: {
+          header: [
+            'You\'re receiving this email because your <span style="color: #9029f4">lendr.cc</span> password was reset.',
+            'To login, goto <a href="https://www.lendr.cc/login">https://www.lendr.cc/login</a> and use the following to login:'
+          ],
+          info: [
+            'Username: <strong>chris</strong>',
+            'Password: <strong>SEjao2039Askjcu</strong>'
+          ],
+          footer: [
+            'You\'ll be prompted to create a new password afterwords.'
+          ],
+        }
       });
 
       if (info) {
@@ -94,7 +98,6 @@ router.post('/me/test-email', async (req, res) => {
       }
     }
     catch (err) {
-      console.log(err);
       res.status(500).send(err);
     }
   }
@@ -242,15 +245,16 @@ router.post('/:id/payment', async (req, res) => {
     // Send email
     borrower.sendMail({
       subject: 'Payment Confirmation',
-      html: `
-      <h2>Payment Confirmation</h2>
-      <p>Your payment for <span style="color: #9029f4; font-weight: bold">\$${emAmount}</span> was received!</p>
-      <p>Information regarding your payment can be found below or on <a href="https://www.lendr.cc">https://www.lendr.cc</a>.</p>
-      <div style="font-family: monospace; margin-top: 2em;">
-        <p>Amount: <strong>\$${emAmount}</strong></p>
-        <p>Account Total: <strong>\$${emAccountTotal}</strong></p>
-      </div>
-      `
+      content: {
+        header: [
+          `Your payment for <span style="color: #9029f4; font-weight: bold">\$${emAmount}</span> was received!`,
+          'Information regarding your payment can be found below or on <a href="https://www.lendr.cc">https://www.lendr.cc</a>.'
+        ],
+        info: [
+          `Amount: <strong>\$${emAmount}</strong>`,
+          `Account Total: <strong>\$${emAccountTotal}</strong>`
+        ]
+      }
     });
 
     // Send success

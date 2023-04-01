@@ -66,20 +66,21 @@ router.post('/create', async (req, res) => {
 
         await borrower.sendMail({
           subject: 'Loan Confirmation',
-          html: `
-          <h2>Loan Confirmation</h2>
-          <p>A new loan was created on your lendr.cc account for <span style="color: #9029f4; font-weight: bold">\$${emPrincipal}</span>.</p>
-          <p>Information regarding your loan can be found below or on <a href="https://www.lendr.cc">https://www.lendr.cc</a></p>
-          <div style="font-family: monospace; margin-top: 2em;">
-            <p>ID: <strong>${loan._id}</strong></p>
-            <p>Memo: <strong>${loan.memo}</strong></p>
-            <p>Principal: <strong>\$${emPrincipal}</strong></p>
-            <p>Interest: <strong>${emInterest}% APR</strong></p>
-            <p>Grace Period End: <strong>${emGpe}</strong></p>
-            <br>
-            <p>Account Total: <strong>\$${emAccountTotal}</strong></p>
-          </div>
-          `
+          content: {
+            header: [
+              `A new loan was created on your lendr.cc account for <span style="color: #9029f4; font-weight: bold">\$${emPrincipal}</span>.`,
+              'Information regarding your loan can be found below or on <a href="https://www.lendr.cc">https://www.lendr.cc</a>'
+            ],
+            info: [
+              `ID: <strong>${loan._id}</strong>`,
+              `Memo: <strong>${loan.memo}</strong>`,
+              `Principal: <strong>\$${emPrincipal}</strong>`,
+              `Interest: <strong>${emInterest}% APR</strong>`,
+              `Grace Period End: <strong>${emGpe}</strong>`,
+              '',
+              `Account Total: <strong>\$${emAccountTotal}</strong>`
+            ]
+          }
         });
       }
 
