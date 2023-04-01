@@ -1,8 +1,6 @@
-const ACTIVITY_PER_PAGE = 7;
-
 const router = require('express').Router();
 const { isValidObjectId } = require('mongoose');
-const { Member, Loan, Activity, getMembersLoans, getMembersActivity } = require('../../../models/all');
+const { Member, Activity, getMembersLoans, getMembersActivity } = require('../../../models/all');
 const { secure } = require('../../secure');
 
 /**
