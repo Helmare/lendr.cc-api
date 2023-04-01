@@ -220,6 +220,9 @@ router.post('/:id/payment', async (req, res) => {
     affectedLoans.push(loan._id);
     await loan.save();
   });
+  if (memberLoans.total <= 0) {
+    memberLoans.total = 0;
+  }
 
   // Create activity.
   const activity = new Activity({
@@ -241,10 +244,11 @@ router.post('/:id/payment', async (req, res) => {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2
     });
+    const emPaidOff = memberLoans.total == 0;
 
     // Send email
     borrower.sendMail({
-      subject: 'Payment Confirmation',
+      subject: emPaidOff ? 'Loan Is Paid Off! 🎉' : 'Payment Confirmation',
       content: {
         header: [
           `Your payment for <span style="color: #9029f4; font-weight: bold">\$${emAmount}</span> was received!`,
@@ -252,7 +256,7 @@ router.post('/:id/payment', async (req, res) => {
         ],
         info: [
           `Amount: <strong>\$${emAmount}</strong>`,
-          `Account Total: <strong>\$${emAccountTotal}</strong>`
+          `Account Total: <strong>\$${emAccountTotal}</strong>${emPaidOff ? ' 🎉' : ''}`
         ]
       }
     });
