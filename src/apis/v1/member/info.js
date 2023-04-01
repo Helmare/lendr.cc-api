@@ -2,7 +2,7 @@ const ACTIVITY_PER_PAGE = 7;
 
 const router = require('express').Router();
 const { isValidObjectId } = require('mongoose');
-const { Member, Loan, Activity } = require('../../../models/all');
+const { Member, Loan, Activity, getMembersLoans, getMembersActivity } = require('../../../models/all');
 const { secure } = require('../../secure');
 
 /**
@@ -22,47 +22,6 @@ async function memberExists(memberId) {
   catch {
     return false;
   }
-}
-/**
- * Gets all the loans for a member.
- * @param {string | import('mongoose').Types.ObjectId} memberId 
- */
-async function getMembersLoans(memberId) {
-  let loans;
-  if (memberId) {
-    loans = await Loan.find({ borrowers: memberId, $or: [{archived: false}, {archived: { $exists: false }}] });
-  }
-  else {
-    loans = await Loan.find({ $or: [{archived: false}, {archived: { $exists: false }}] });
-  }
-
-  // Calculate total.
-  let total = 0;
-  let upcomingInterest = 0;
-  await loans.forEach(async (loan) => {
-    await loan.chargeInterest();
-    total += loan.total;
-    upcomingInterest += loan.calcInterest();
-  });
-
-  return {
-    total, upcomingInterest, loans
-  };
-}
-/**
- * Gets all the activity for a member.
- * @param {string | import('mongoose').Types.ObjectId} memberId
- * @param {Number} page
- */
-async function getMembersActivity(memberId, page) {
-  const p = page || 0;
-  const activity = await Activity.find(
-    { $or: [{ members: memberId }, { broadcast: true }] }, 
-    null, 
-    { sort: { createdAt: -1 }, skip: p * ACTIVITY_PER_PAGE, limit: ACTIVITY_PER_PAGE }
-  );
-
-  return activity;
 }
 
 // An endpoint for displaying basic information for all members (admin only).
