@@ -1,3 +1,4 @@
+const ACTIVITY_PER_PAGE = 7;
 const Member = require('./member');
 const Loan = require('./loan');
 const Activity = require('./activity');
