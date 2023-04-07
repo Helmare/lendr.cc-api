@@ -7,14 +7,14 @@ if (process.env.DEV_IPS) {
 }
 
 // Verify source of the request.
-router.use((req, res, next) => {
+router.use(async (req, res, next) => {
   let isValid = false;
   DEV_IPS.forEach(ip => {
     isValid = isValid || req.ip == ip;
   });
 
   if (isValid) {
-    next();
+    await next();
   }
   else {
     res.status(403).send({ 'err': 'Access denied' });
@@ -22,7 +22,7 @@ router.use((req, res, next) => {
 });
 
 // Creates a new member
-router.post('/member/create', (req, res) => {
+router.post('/member/create', async (req, res) => {
   // Verify body
   if (!req.body.username) {
     res.status(400).send({ 'err': 'Missing username.' });
@@ -47,36 +47,14 @@ router.post('/member/create', (req, res) => {
   }
 
   // Save.
-  member.save().then(() => {
+  try {
+    await member.save();
     result.member = member.toJSON();
     res.send(result);
-  }).catch((err) => {
-    res.status(501).send({ 'err': 'Could not create new member.' });
-    console.log(err);
-  });
-});
-
-// Gets a member by there id.
-router.get('/member/:id', (req, res) => {
-  Member.findById(req.params.id).then(member => {
-    if (member) {
-      res.send(member.toJSON());
-    }
-    else {
-      res.send({ 'err': 'Could not find member.' });
-    }
-  });
-});
-router.patch('/member/:id/reset', (req, res) => {
-  Member.findById(req.params.id).then(member => {
-    if (member) {
-      const tempPassword = member.resetPassword();
-      member.save().then(() => res.send({ tempPassword: tempPassword, member: member.toJSON() }));
-    }
-    else {
-      res.send({ 'err': 'Could not find member.' });
-    }
-  });
+  }
+  catch (err) {
+    res.status(500).send({ 'err': err.message });
+  }
 });
 
 // Export router
