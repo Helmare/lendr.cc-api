@@ -40,8 +40,6 @@ router.patch('/forgot-password', async (req, res) => {
 
   const member = await Member.findOne({ username: req.body.username });
   if (member != null) {
-    console.log(member.username + ' forgot their password.');
-
     // Reset password
     const tempPassword = member.resetPassword();
     await member.save();
