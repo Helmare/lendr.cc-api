@@ -31,6 +31,40 @@ router.post('/login', async (req, res) => {
     res.send({ 'err': 'Invalid username or password.' });
   }
 });
+
+router.patch('/forgot-password', async (req, res) => {
+  if (!req.body.username) {
+    res.status(400).send({ err: 'Missing username.' });
+    return;
+  }
+
+  const member = await Member.findOne({ username: req.body.username });
+  if (member != null) {
+    console.log(member.username + ' forgot their password.');
+
+    // Reset password
+    const tempPassword = member.resetPassword();
+    await member.save();
+
+    // Send email
+    await member.sendMail({
+      subject: 'Password Reset',
+      content: {
+        header: [
+          'You\'re receiving this email because your <span style="color: #9029f4">lendr.cc</span> password was reset.',
+          `To login, goto <a href="https://www.lendr.cc/login/reset?f=${member.resetFlag}">https://www.lendr.cc/login/reset?f=${member.resetFlag}</a>`,
+          'or use the following credentials to login:'
+        ],
+        info: [
+          `Username: <strong>${member.username}</strong>`,
+          `Password: <strong>${tempPassword}</strong>`
+        ]
+      }
+    });
+  }
+  res.send({ msg: 'Successfully sent email to member.' });
+});
+
 // Resets the password of someone who needs it reset.
 router.patch('/reset-password', async (req, res) => {
   if (!req.body.resetFlag) {
@@ -44,7 +78,7 @@ router.patch('/reset-password', async (req, res) => {
 
   const member = await Member.findOne({ resetFlag: req.body.resetFlag });
   if (member == null) {
-    res.status(403).send({ err: 'Forbidden' })
+    res.status(403).send({ err: 'Forbidden' });
   }
   else {
     member.setPassword(req.body.password);
